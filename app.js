@@ -19,8 +19,4 @@ app.use((req,res,next) =>{
 app.use('/v1/tours', tourRouter);
 app.use('/v1/users',userRouter);
 
-//server connection
-const port = 3000;
-app.listen(port, ()=>{
-    console.log('project is running on port : '+ `${port}`);
-}); 
+module.exports = app;
