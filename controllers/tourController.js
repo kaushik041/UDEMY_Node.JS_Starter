@@ -1,6 +1,7 @@
 var fs = require('fs');
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+//tour handler methods
 exports.getAllTours = (req, res)=>{
     res.status(200).json({
         status:'success',
