@@ -1,6 +1,19 @@
 var fs = require('fs');
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+
+//middleware
+exports.nameCheckMiddleware = (req, res, next) =>{
+    if(!req.body.name || !req.body.price){
+        res.status(404).json({
+            status:'failed',
+            message: 'Name and Price required'
+        });
+    }
+    next();
+}
+
+
 //tour handler methods
 exports.getAllTours = (req, res)=>{
     res.status(200).json({
@@ -30,7 +43,7 @@ exports.postSingleTour = (req,res)=>{
     tours.push(newTour);
 
     fs.writeFile(
-       `${__dirname}/dev-data/data/tours-simple.json`,
+       `${__dirname}/../dev-data/data/tours-simple.json`,
        JSON.stringify(tours),
        err=>{
            res.status(201).json({
