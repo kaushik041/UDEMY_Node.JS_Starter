@@ -6,7 +6,7 @@ const tourController = require('./../controllers/tourController')
 //routing
 router.route('/')
 .get(tourController.getAllTours)
-.post(tourController.nameCheckMiddleware, tourController.postSingleTour)
+.post(tourController.postSingleTour)
 
 router.route('/:id')
 .get(tourController.getSingleTour)
