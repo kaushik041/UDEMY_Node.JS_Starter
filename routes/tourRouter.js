@@ -4,6 +4,8 @@ const tourController = require('./../controllers/tourController')
 
 
 //routing
+router.route('/expensive-tour').get(tourController.getExpensiveTour , tourController.getAllTours);
+
 router.route('/')
 .get(tourController.getAllTours)
 .post(tourController.postSingleTour)
