@@ -65,7 +65,7 @@ exports.postSingleTour = async (req,res)=>{
 }
 exports.updateSingleTour = async (req,res)=>{
    try{
-    const tour_update = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    const tour_update = await Tour(req.params.id, req.body, {
         new: true
     });
     res.status(200).json({
@@ -80,4 +80,33 @@ exports.updateSingleTour = async (req,res)=>{
         message:err 
     });
    }
+}
+
+exports.getTourStat = async (req, res) =>{
+    try{
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage : { $gte : 4.5 } }
+            },
+            {
+                $group: {
+                   _id:null,
+                    avgRating:{$avg:'$ratingsAverage'},
+                    avgPrice:{$avg:'$price'}
+                }
+            }
+        ]);
+        console.log(stats);
+        res.status(200).json({
+            status:'success',
+            data:{
+                stats
+            }
+        })
+    }catch(err){
+        res.status(400).json({
+            status:'failed',
+            message:err 
+        });
+    }
 }
