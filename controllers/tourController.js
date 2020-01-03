@@ -68,7 +68,7 @@ exports.updateSingleTour = async (req,res)=>{
     const tour_update = await Tour(req.params.id, req.body, {
         new: true
     });
-    res.status(200).json({
+    res.status(200).json({      
         status:'success',
         body:{
             tour_update
@@ -96,7 +96,6 @@ exports.getTourStat = async (req, res) =>{
                 }
             }
         ]);
-        console.log(stats);
         res.status(200).json({
             status:'success',
             data:{
