@@ -21,4 +21,12 @@ app.use((req,res,next) =>{
 app.use('/v1/tours', tourRouter);
 app.use('/v1/users',userRouter);
 
+app.all('*', (req,res,next)=>{
+    res.status(404).json({
+        status:'fail',
+        message:'URL not found or cannot access'
+    });
+    next();
+});
+
 module.exports = app;
