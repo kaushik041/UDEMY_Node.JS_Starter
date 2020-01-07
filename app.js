@@ -4,7 +4,8 @@ const http = require("http");
 const app = express();
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
-
+const AppError = require('./utils/appErrors')
+const errorHandler = require('./controllers/errorController');
 //using Middleware
 if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
@@ -22,11 +23,9 @@ app.use('/v1/tours', tourRouter);
 app.use('/v1/users',userRouter);
 
 app.all('*', (req,res,next)=>{
-    res.status(404).json({
-        status:'fail',
-        message:'URL not found or cannot access'
-    });
-    next();
+    next(new AppError('URL not found in the server', 404));
 });
+
+app.use(errorHandler);
 
 module.exports = app;
