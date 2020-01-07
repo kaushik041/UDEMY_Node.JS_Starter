@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const authController = require('./../controllers/authController');
 //user 
 const getAllUsers = (req,res) =>{
     res.status(500).json({
@@ -27,6 +27,7 @@ const UpdateUser = (req,res) =>{
     })
 }
 
+router.post('/singup', authController.signup);
 router.route('/')
 .get(getAllUsers)
 .post(postUser)
