@@ -28,6 +28,8 @@ const UpdateUser = (req,res) =>{
 }
 
 router.post('/singup', authController.signup);
+router.post('/login', authController.login);
+
 router.route('/')
 .get(getAllUsers)
 .post(postUser)
