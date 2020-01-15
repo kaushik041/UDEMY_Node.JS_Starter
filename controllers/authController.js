@@ -2,6 +2,7 @@ const User = require('./../models/userModel');
 const jwt = require('jsonwebtoken')
 const catchAsync = require('./../utils/catchAsync');
 const appError = require('./../utils/appErrors')
+const {promisify} = require('util');
 
 const userToken = id => {
     return jwt.sign({id : id}, process.env.JWT_SECRET, {
@@ -46,3 +47,25 @@ exports.login = catchAsync( async (req,res,next) =>{
         message: 'User Logged In'
     })
 });
+
+exports.protectRoute = catchAsync( async (req,res,next) => {
+    let token;
+    if(req.headers.authorization && req.headers.authorization.startsWith('tour-access')){
+        token = req.headers.authorization.split(' ')[1];
+    }
+    //console.log(token);
+    if(!token){ 
+        return next(new appError('You are not logged in !!!', 401));
+    }
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    const userCheck = await User.findById(decoded.id);
+    if(!userCheck)
+        return next(new appError('User does not exist !!!', 401))   
+        
+    if(userCheck.passwordChanged(decoded.iat))
+            return next(new appError('User changed password ! Please Log in to continue !!!', 401))
+
+    req.user = userCheck;        
+    next();
+})
