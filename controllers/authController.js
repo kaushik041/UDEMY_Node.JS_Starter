@@ -14,7 +14,8 @@ exports.signup = catchAsync ( async (req,res,next) => {
         name : req.body.name,
         email : req.body.email,
         password : req.body.password,
-        confirm_password : req.body.confirm_password
+        confirm_password : req.body.confirm_password,
+        roles : req.body.roles
     });
 
     const token = userToken(new_user._id);
@@ -68,4 +69,13 @@ exports.protectRoute = catchAsync( async (req,res,next) => {
 
     req.user = userCheck;        
     next();
-})
+});
+
+exports.restrictTo = (...roles) => {
+    return (req,res,next) => {
+        if(!roles.includes(req.user.roles)){
+            return next(new appError('Access denied !!!', 403));
+        }
+        next();
+    }
+};

@@ -8,8 +8,8 @@ router.route('/expensive-tour').get(tourController.getExpensiveTour , tourContro
 router.route('/getStats').get(tourController.getTourStat);
 
 router.route('/')
-.get(authController.protectRoute, tourController.getAllTours)
-.post(tourController.postSingleTour)
+.get(authController.protectRoute, authController.restrictTo('admin'), tourController.getAllTours)
+.post(authController.protectRoute, tourController.postSingleTour)
 
 router.route('/:id')
 .get(tourController.getSingleTour)

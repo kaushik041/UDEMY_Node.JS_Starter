@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
             message:'password is not matched'
         }
     },
+    roles:{
+        type:String,
+        enum:['user','admin','guide'],
+        default:'user'
+    },
     user_image:{
         type: String
     },
@@ -57,7 +62,7 @@ userSchema.methods.passwordCheck = async function(candidatePassword, userPasswor
 userSchema.methods.passwordChanged = function(JWTTimestamp){
     if(this.passwordChangedAt){
         const timeStampChange = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
-        console.log(this.passwordChangedAt,JWTTimestamp);
+        //console.log(this.passwordChangedAt,JWTTimestamp);
         return JWTTimestamp < timeStampChange;
     }
     return false;
