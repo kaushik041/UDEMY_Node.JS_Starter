@@ -2,6 +2,7 @@ const User = require('./../models/userModel');
 const jwt = require('jsonwebtoken')
 const catchAsync = require('./../utils/catchAsync');
 const appError = require('./../utils/appErrors')
+const {promisify} = require('util');
 
 const userToken = id => {
     return jwt.sign({id : id}, process.env.JWT_SECRET, {
@@ -13,7 +14,8 @@ exports.signup = catchAsync ( async (req,res,next) => {
         name : req.body.name,
         email : req.body.email,
         password : req.body.password,
-        confirm_password : req.body.confirm_password
+        confirm_password : req.body.confirm_password,
+        roles : req.body.roles
     });
 
     const token = userToken(new_user._id);
@@ -46,3 +48,34 @@ exports.login = catchAsync( async (req,res,next) =>{
         message: 'User Logged In'
     })
 });
+
+exports.protectRoute = catchAsync( async (req,res,next) => {
+    let token;
+    if(req.headers.authorization && req.headers.authorization.startsWith('tour-access')){
+        token = req.headers.authorization.split(' ')[1];
+    }
+    //console.log(token);
+    if(!token){ 
+        return next(new appError('You are not logged in !!!', 401));
+    }
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    const userCheck = await User.findById(decoded.id);
+    if(!userCheck)
+        return next(new appError('User does not exist !!!', 401))   
+        
+    if(userCheck.passwordChanged(decoded.iat))
+            return next(new appError('User changed password ! Please Log in to continue !!!', 401))
+
+    req.user = userCheck;        
+    next();
+});
+
+exports.restrictTo = (...roles) => {
+    return (req,res,next) => {
+        if(!roles.includes(req.user.roles)){
+            return next(new appError('Access denied !!!', 403));
+        }
+        next();
+    }
+};

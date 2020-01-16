@@ -6,6 +6,7 @@ const tourSchema = new mongoose.Schema({
         required:[true, 'name field required'],
         //unique:true
     },
+    
     duration:{
         type:Number,
         required:[true, 'duration field required']
