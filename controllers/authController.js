@@ -9,7 +9,18 @@ const {promisify} = require('util');
 const userToken = id => {
     return jwt.sign({id : id}, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN })//payload+signature+duration
-}
+};
+
+const createTokenAndStatus = (user, statusCode, res) => {
+    const token = userToken(user._id);
+    res.status(statusCode).json({
+        status:'success',
+        token,
+        data:{
+            user
+        }
+    })
+};
 
 exports.signup = catchAsync ( async (req,res,next) => {
     const new_user = await User.create({
@@ -20,14 +31,8 @@ exports.signup = catchAsync ( async (req,res,next) => {
         roles : req.body.roles
     });
 
-    const token = userToken(new_user._id);
-    res.status(201).json({
-        status:'success',
-        token,
-        data:{
-            user : new_user
-        }
-    })
+    createTokenAndStatus(new_user, 201, res);
+    
 });
 
 exports.login = catchAsync( async (req,res,next) =>{
@@ -43,12 +48,7 @@ exports.login = catchAsync( async (req,res,next) =>{
     if(!user || !(await user.passwordCheck(password, user.password))){
         return next(new appError('Credentials doesnot match', 401));
     }
-    const token = userToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token,
-        message: 'User Logged In'
-    })
+    createTokenAndStatus(user, 200, res);
 });
 
 exports.protectRoute = catchAsync( async (req,res,next) => {
@@ -134,10 +134,23 @@ exports.resetPassowrd = catchAsync( async (req, res, next) => {
     await user.save();
 
     //log the user in with sending token
-    const token = userToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token,
-        message: 'User Logged In'
-    })
+    createTokenAndStatus(user, 201, res);
+});
+
+exports.updatePassword = catchAsync( async (req, res, next) => {
+
+    //check user
+    const user = await User.findById(req.user.id).select('+password');
+
+    //password checking
+    if(! await(user.passwordCheck(req.body.previous_password,user.password)))
+        return next(new appError('Password is not matched', 401));
+
+    //change the password
+    user.password = req.body.password;
+    user.confirm_password = req.body.confirm_password;  
+    await user.save();  
+
+    //log the user in with sending token
+    createTokenAndStatus(user, 201, res);
 });
