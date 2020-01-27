@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const catchAsync = require('./../utils/catchAsync');
 const appError = require('./../utils/appErrors');
 const sendEmail = require('./../utils/email');
+const crypto = require('crypto');
 const {promisify} = require('util');
 
 const userToken = id => {
@@ -116,4 +117,27 @@ exports.forgetPassword = catchAsync( async (req,res,next) => {
 
 exports.resetPassowrd = catchAsync( async (req, res, next) => {
 
+    // get user based token
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await User.findOne({passwordResetToken : hashedToken, passwordTokenExpire : {
+        $gt: Date.now()
+    }})
+
+    //check the user with token
+    if(!user){
+        return next(new appError('Invalid token / Session expired', 400))
+    }
+    user.password = req.body.password;
+    user.confirm_password = req.body.confirm_password;
+    user.passwordResetToken = undefined;
+    user.passwordTokenExpire = undefined;
+    await user.save();
+
+    //log the user in with sending token
+    const token = userToken(user._id);
+    res.status(200).json({
+        status: 'success',
+        token,
+        message: 'User Logged In'
+    })
 });
