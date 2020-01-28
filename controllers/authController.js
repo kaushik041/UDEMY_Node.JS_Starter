@@ -13,8 +13,19 @@ const userToken = id => {
 
 const createTokenAndStatus = (user, statusCode, res) => {
     const token = userToken(user._id);
+    //browser cookie setup
+    const coockieOption = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),        
+        httpOnly: true
+    };
+
+    if(process.env.NODE_ENV === 'production')
+        coockieOption.secure = true; //https only security
+
+    res.cookie('jwt', token, coockieOption)
+
     res.status(statusCode).json({
-        status:'success',
+        status:'success', 
         token,
         data:{
             user
@@ -30,9 +41,7 @@ exports.signup = catchAsync ( async (req,res,next) => {
         confirm_password : req.body.confirm_password,
         roles : req.body.roles
     });
-
     createTokenAndStatus(new_user, 201, res);
-    
 });
 
 exports.login = catchAsync( async (req,res,next) =>{
