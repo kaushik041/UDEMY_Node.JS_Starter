@@ -89,6 +89,13 @@ tourSchema.virtual('week_durations').get(function(){
     return this.duration / 7;
 });
 
+tourSchema.pre(/^find/, function(next) {
+    this.populate({
+        path:'guides',
+        select:'-__v -passwordChangedAt'
+    })
+})
+
 // tourSchema.pre('save',async function(next){
 //     const tourPromise = this.guides.map(async id => await User.findById(id));
 //     this.guides = await Promise.all(tourPromise);

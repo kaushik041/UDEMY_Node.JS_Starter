@@ -8,6 +8,7 @@ const http = require("http");
 const app = express();
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const reviewRouter = require('./routes/reviewRouter');
 const AppError = require('./utils/appErrors')
 const errorHandler = require('./controllers/errorController');
 
@@ -48,6 +49,7 @@ app.use((req,res,next) =>{
 //router middleware
 app.use('/v1/tours', tourRouter);
 app.use('/v1/users',userRouter);
+app.use('/v1/reviews',reviewRouter);
 
 app.all('*', (req,res,next)=>{
     next(new AppError('URL not found in the server', 404));
